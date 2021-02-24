@@ -58,12 +58,19 @@ public class GeolocatorPlugin implements FlutterPlugin, ActivityAware {
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
-    methodCallHandler = new MethodCallHandlerImpl(this.permissionManager, this.geolocationManager);
-    methodCallHandler.startListening(
-        flutterPluginBinding.getApplicationContext(), flutterPluginBinding.getBinaryMessenger());
-    streamHandler = new StreamHandlerImpl(this.geolocationManager);
-    streamHandler.startListening(
-        flutterPluginBinding.getApplicationContext(), flutterPluginBinding.getBinaryMessenger());
+      GeolocatorPlugin geolocatorPlugin = new GeolocatorPlugin();
+      geolocatorPlugin.pluginRegistrar = registrar;
+      geolocatorPlugin.registerListeners();
+
+      MethodCallHandlerImpl methodCallHandler =
+              new MethodCallHandlerImpl(
+                      geolocatorPlugin.permissionManager, geolocatorPlugin.geolocationManager);
+      methodCallHandler.startListening(registrar.context(), registrar.messenger());
+      methodCallHandler.setActivity(registrar.activity());
+
+      StreamHandlerImpl streamHandler = new StreamHandlerImpl(geolocatorPlugin.geolocationManager);
+      streamHandler.startListening(registrar.context(), registrar.messenger());
+      streamHandler.setActivity(registrar.activity());
   }
 
   @Override
